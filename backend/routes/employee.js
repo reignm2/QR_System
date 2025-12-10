@@ -15,8 +15,8 @@ router.get('/me', auth, async (req, res) => {
 
     const [rows] = await db.query(
       `SELECT e.employeeID, e.first_name, e.last_name, e.email, e.position, e.status, d.department_name
-       FROM Employee e
-       LEFT JOIN Department d ON e.department_id = d.department_id
+       FROM employee e
+       LEFT JOIN department d ON e.department_id = d.department_id
        WHERE e.employeeID = ?`,
       [employeeID]
     );
@@ -93,8 +93,8 @@ router.get('/', auth, async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT e.employeeID, e.first_name, e.last_name, e.email, e.position, e.status, d.department_name, d.department_id
-       FROM Employee e
-       LEFT JOIN Department d ON e.department_id = d.department_id`
+       FROM employee e
+       LEFT JOIN department d ON e.department_id = d.department_id`
     );
     res.json(rows);
   } catch (err) {
@@ -113,7 +113,7 @@ router.post('/', auth, async (req, res) => {
   }
   try {
     const [result] = await db.query(
-      `INSERT INTO Employee (first_name, last_name, email, department_id, position, password, status)
+      `INSERT INTO employee (first_name, last_name, email, department_id, position, password, status)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [first_name, last_name, email, department_id, position, password, status]
     );
@@ -136,10 +136,10 @@ router.put('/:id', auth, async (req, res) => {
     // If password is provided, update it; otherwise, don't change password
     let query, params;
     if (password) {
-      query = `UPDATE Employee SET first_name=?, last_name=?, email=?, department_id=?, position=?, password=?, status=? WHERE employeeID=?`;
+      query = `UPDATE employee SET first_name=?, last_name=?, email=?, department_id=?, position=?, password=?, status=? WHERE employeeID=?`;
       params = [first_name, last_name, email, department_id, position, password, status, req.params.id];
     } else {
-      query = `UPDATE Employee SET first_name=?, last_name=?, email=?, department_id=?, position=?, status=? WHERE employeeID=?`;
+      query = `UPDATE employee SET first_name=?, last_name=?, email=?, department_id=?, position=?, status=? WHERE employeeID=?`;
       params = [first_name, last_name, email, department_id, position, status, req.params.id];
     }
     await db.query(query, params);
@@ -155,7 +155,7 @@ router.delete('/:id', auth, async (req, res) => {
     return res.status(403).json({ error: 'Forbidden' });
   }
   try {
-    await db.query('DELETE FROM Employee WHERE employeeID = ?', [req.params.id]);
+    await db.query('DELETE FROM employee WHERE employeeID = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Database error', details: err.message });

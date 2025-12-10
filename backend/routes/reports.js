@@ -10,8 +10,8 @@ router.get('/daily', auth, async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT e.employeeID, CONCAT(e.first_name, ' ', e.last_name) AS name, a.date, a.time_in, a.time_out, a.status, a.late_minutes
-       FROM Attendance a
-       JOIN Employee e ON a.employeeID = e.employeeID
+       FROM attendance a
+       JOIN employee e ON a.employeeID = e.employeeID
        WHERE DATE(a.date) = ?`,
       [date]
     );
@@ -27,8 +27,8 @@ router.get('/daily/export', auth, async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT e.employeeID, CONCAT(e.first_name, ' ', e.last_name) AS name, a.date, a.time_in, a.time_out, a.status, a.late_minutes
-       FROM Attendance a
-       JOIN Employee e ON a.employeeID = e.employeeID
+       FROM attendance a
+       JOIN employee e ON a.employeeID = e.employeeID
        WHERE DATE(a.date) = ?`,
       [date]
     );
@@ -64,8 +64,8 @@ router.get('/monthly', auth, async (req, res) => {
         SUM(a.late_minutes) AS total_late_minutes,
         SUM(a.overtime_minutes) AS overtime_minutes,
         SUM(a.hours) AS total_hours
-       FROM Attendance a
-       JOIN Employee e ON a.employeeID = e.employeeID
+       FROM attendance a
+       JOIN employee e ON a.employeeID = e.employeeID
        WHERE DATE_FORMAT(a.date, '%Y-%m') = ?
        GROUP BY a.employeeID`,
       [month]
@@ -87,8 +87,8 @@ router.get('/monthly/export', auth, async (req, res) => {
         SUM(a.late_minutes) AS total_late_minutes,
         SUM(a.overtime_minutes) AS overtime_minutes,
         SUM(a.hours) AS total_hours
-       FROM Attendance a
-       JOIN Employee e ON a.employeeID = e.employeeID
+       FROM attendance a
+       JOIN employee e ON a.employeeID = e.employeeID
        WHERE DATE_FORMAT(a.date, '%Y-%m') = ?
        GROUP BY a.employeeID`,
       [month]
@@ -121,7 +121,7 @@ router.get('/logs', auth, async (req, res) => {
     const [rows] = await db.query(
       `SELECT e.employeeID, CONCAT(e.first_name, ' ', e.last_name) AS name, l.date, l.status
        FROM AttendanceLogs l
-       JOIN Employee e ON l.employeeID = e.employeeID
+       JOIN employee e ON l.employeeID = e.employeeID
        WHERE DATE(l.date) = ?
        ORDER BY l.date ASC`,
       [date]
@@ -139,7 +139,7 @@ router.get('/logs/export', auth, async (req, res) => {
     const [rows] = await db.query(
       `SELECT e.employeeID, CONCAT(e.first_name, ' ', e.last_name) AS name, l.timestamp, l.status
        FROM AttendanceLogs l
-       JOIN Employee e ON l.employeeID = e.employeeID
+       JOIN employee e ON l.employeeID = e.employeeID
        WHERE DATE(l.timestamp) BETWEEN ? AND ?
        ORDER BY l.timestamp ASC`,
       [from, to]
@@ -167,8 +167,8 @@ router.get('/generated', auth, async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT r.report_id, a.username AS generated_by, r.date_generated, r.report_type, r.remarks
-       FROM Report r
-       JOIN Admin a ON r.admin_id = a.admin_id
+       FROM report r
+       JOIN admin a ON r.admin_id = a.admin_id
        ORDER BY r.date_generated DESC`
     );
     res.json({ records: rows });
@@ -183,7 +183,7 @@ router.post('/generated', auth, async (req, res) => {
   const admin_id = req.user.admin_id;
   try {
     await db.query(
-      `INSERT INTO Report (admin_id, date_generated, report_type, remarks)
+      `INSERT INTO report (admin_id, date_generated, report_type, remarks)
        VALUES (?, NOW(), ?, ?)`,
       [admin_id, report_type, remarks]
     );
@@ -198,7 +198,7 @@ router.put('/generated/:id', auth, async (req, res) => {
   const { report_type, remarks } = req.body;
   try {
     await db.query(
-      `UPDATE Report SET report_type=?, remarks=? WHERE report_id=?`,
+      `UPDATE report SET report_type=?, remarks=? WHERE report_id=?`,
       [report_type, remarks, req.params.id]
     );
     res.json({ success: true });
@@ -211,7 +211,7 @@ router.put('/generated/:id', auth, async (req, res) => {
 router.delete('/generated/:id', auth, async (req, res) => {
   try {
     await db.query(
-      `DELETE FROM Report WHERE report_id=?`,
+      `DELETE FROM report WHERE report_id=?`,
       [req.params.id]
     );
     res.json({ success: true });

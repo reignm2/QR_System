@@ -13,7 +13,7 @@ const SECRET = process.env.JWT_SECRET;
 router.post('/employee/login', async (req, res) => {
   const { employeeID, password } = req.body;
   try {
-    const [rows] = await db.query('SELECT * FROM Employee WHERE employeeID = ?', [employeeID]);
+    const [rows] = await db.query('SELECT * FROM employee WHERE employeeID = ?', [employeeID]);
     if (!rows || rows.length === 0) return res.status(401).json({ error: 'Employee not found' });
 
     const employee = rows[0];
@@ -39,7 +39,7 @@ router.post('/employee/login', async (req, res) => {
 router.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
   try {
-    const [rows] = await db.query('SELECT * FROM Admin WHERE username = ?', [username]);
+    const [rows] = await db.query('SELECT * FROM admin WHERE username = ?', [username]);
     if (!rows || rows.length === 0) return res.status(401).json({ error: 'Admin not found' });
 
     const admin = rows[0];
