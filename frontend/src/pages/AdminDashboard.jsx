@@ -8,7 +8,6 @@ Chart.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement
 
 function AdminDashboard() {
   const [scanResult, setScanResult] = useState('');
-  const [message, setMessage] = useState('');
   const [attendance, setAttendance] = useState([]);
   const [showScanner, setShowScanner] = useState(false);
   const [presentToday, setPresentToday] = useState(0);
