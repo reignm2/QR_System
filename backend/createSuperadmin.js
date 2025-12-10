@@ -6,7 +6,7 @@ async function createSuperadmin() {
   try {
     const name = 'Super Admin';
     const username = 'superadmin';
-    const password = 'superadmin123';
+    const password = 'reign123';
     const role = 'superadmin';
 
     const hashed = await bcrypt.hash(password, 10);

@@ -12,7 +12,7 @@ router.post('/time-in', auth, async (req, res) => {
 
     // Check if already timed in today
     const [rows] = await db.query(
-      'SELECT * FROM Attendance WHERE employeeID = ? AND date = CURDATE()',
+      'SELECT * FROM attendance WHERE employeeID = ? AND date = CURDATE()',
       [employeeID]
     );
     if (rows.length > 0 && rows[0].time_in) {
@@ -35,7 +35,7 @@ router.post('/time-in', auth, async (req, res) => {
     }
 
     await db.query(
-      'INSERT INTO Attendance (employeeID, time_in, date, status, late_minutes) VALUES (?, NOW(), CURDATE(), ?, ?)',
+      'INSERT INTO attendance (employeeID, time_in, date, status, late_minutes) VALUES (?, NOW(), CURDATE(), ?, ?)',
       [employeeID, status, late_minutes]
     );
     res.json({ success: true, message: `Time in recorded as ${status}` });
@@ -53,7 +53,7 @@ router.post('/time-out', auth, async (req, res) => {
 
     // Find today's attendance record
     const [rows] = await db.query(
-      'SELECT * FROM Attendance WHERE employeeID = ? AND date = CURDATE()',
+      'SELECT * FROM attendance WHERE employeeID = ? AND date = CURDATE()',
       [employeeID]
     );
     if (rows.length === 0) {
@@ -64,7 +64,7 @@ router.post('/time-out', auth, async (req, res) => {
     }
 
     await db.query(
-      'UPDATE Attendance SET time_out = NOW() WHERE attendanceID = ?',
+      'UPDATE attendance SET time_out = NOW() WHERE attendanceID = ?',
       [rows[0].attendanceID]
     );
     res.json({ success: true, message: 'Time out recorded' });
@@ -81,7 +81,7 @@ cron.schedule('1 18 * * *', async () => {
     // Find employees with no time-in today
     const [employees] = await db.query(`
       SELECT e.employeeID
-      FROM Employee e
+      FROM employee e
       LEFT JOIN Attendance a ON e.employeeID = a.employeeID AND a.date = CURDATE()
       WHERE a.time_in IS NULL
     `);
@@ -89,12 +89,12 @@ cron.schedule('1 18 * * *', async () => {
     for (const emp of employees) {
       // Check if already marked absent to avoid duplicates
       const [existing] = await db.query(
-        'SELECT * FROM Attendance WHERE employeeID = ? AND date = CURDATE()',
+        'SELECT * FROM attendance WHERE employeeID = ? AND date = CURDATE()',
         [emp.employeeID]
       );
       if (!existing.length) {
         await db.query(
-          'INSERT INTO Attendance (employeeID, date, status) VALUES (?, CURDATE(), ?)',
+          'INSERT INTO attendance (employeeID, date, status) VALUES (?, CURDATE(), ?)',
           [emp.employeeID, 'Absent']
         );
       }
@@ -111,8 +111,8 @@ router.get('/', auth, async (req, res) => {
     const [rows] = await db.query(
       `SELECT a.attendanceID, a.employeeID, a.time_in, a.time_out, a.date, a.status,
               CONCAT(e.first_name, ' ', e.last_name) AS employee
-         FROM Attendance a
-         LEFT JOIN Employee e ON a.employeeID = e.employeeID
+         FROM attendance a
+         LEFT JOIN employee e ON a.employeeID = e.employeeID
          ORDER BY a.date DESC, a.time_in DESC`
     );
     res.json(rows);
@@ -132,7 +132,7 @@ router.post('/', auth, async (req, res) => {
   time_out = time_out || null;
   try {
     const [result] = await db.query(
-      `INSERT INTO Attendance (employeeID, time_in, time_out, date, status)
+      `INSERT INTO attendance (employeeID, time_in, time_out, date, status)
        VALUES (?, ?, ?, ?, ?)`,
       [employeeID, time_in, time_out, date, status]
     );
@@ -153,7 +153,7 @@ router.put('/:id', auth, async (req, res) => {
   time_out = time_out || null;
   try {
     await db.query(
-      `UPDATE Attendance SET employeeID=?, time_in=?, time_out=?, date=?, status=?
+      `UPDATE attendance SET employeeID=?, time_in=?, time_out=?, date=?, status=?
        WHERE attendanceID=?`,
       [employeeID, time_in, time_out, date, status, req.params.id]
     );
@@ -166,7 +166,7 @@ router.put('/:id', auth, async (req, res) => {
 // Delete attendance record
 router.delete('/:id', auth, async (req, res) => {
   try {
-    await db.query('DELETE FROM Attendance WHERE attendanceID=?', [req.params.id]);
+    await db.query('DELETE FROM attendance WHERE attendanceID=?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Database error', details: err.message });
@@ -179,8 +179,8 @@ router.get('/today', auth, async (req, res) => {
     const [rows] = await db.query(
       `SELECT a.attendanceID, a.employeeID, a.time_in, a.time_out, a.date, a.status,
               e.first_name, e.last_name
-         FROM Attendance a
-         LEFT JOIN Employee e ON a.employeeID = e.employeeID
+         FROM attendance a
+         LEFT JOIN employee e ON a.employeeID = e.employeeID
          WHERE a.date = CURDATE()
          ORDER BY a.time_in ASC`
     );
@@ -197,7 +197,7 @@ router.get('/my', auth, async (req, res) => {
     if (!employeeID) return res.status(400).json({ error: 'No employee ID in token' });
 
     const [records] = await db.query(
-      `SELECT * FROM Attendance WHERE employeeID = ? ORDER BY date DESC`,
+      `SELECT * FROM attendance WHERE employeeID = ? ORDER BY date DESC`,
       [employeeID]
     );
     res.json({ records });
@@ -212,7 +212,7 @@ router.get('/trends', auth, async (req, res) => {
     const [rows] = await db.query(
       `SELECT date,
         SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) as present
-       FROM Attendance
+       FROM attendance
        WHERE date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
        GROUP BY date
        ORDER BY date ASC`
@@ -231,7 +231,7 @@ router.get('/monthly-summary', auth, async (req, res) => {
         SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) as present,
         SUM(CASE WHEN status='Late' THEN 1 ELSE 0 END) as late,
         SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) as absent
-       FROM Attendance
+       FROM attendance
        WHERE MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())`
     );
     res.json(rows[0]);
@@ -248,8 +248,8 @@ router.post('/scan', auth, async (req, res) => {
     const [rows] = await db.query(
       `SELECT e.employeeID, e.first_name, e.last_name, e.position, d.department_name, e.email, e.status
        FROM qr_code q
-       JOIN Employee e ON q.employee_id = e.employeeID
-       LEFT JOIN Department d ON e.department_id = d.department_id
+       JOIN employee e ON q.employee_id = e.employeeID
+       LEFT JOIN department d ON e.department_id = d.department_id
        WHERE q.code_value = ? AND q.date_generated >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)`,
       [codeValue]
     );

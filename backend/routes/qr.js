@@ -11,7 +11,7 @@ router.get('/', auth, async (req, res) => {
       `SELECT q.qr_id, q.employee_id, q.code_value, q.date_generated,
               CONCAT(e.first_name, ' ', e.last_name) AS employee_name
          FROM qr_code q
-         LEFT JOIN Employee e ON q.employee_id = e.employeeID
+         LEFT JOIN employee e ON q.employee_id = e.employeeID
          ORDER BY q.date_generated DESC`
     );
     res.json(rows);

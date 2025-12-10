@@ -6,7 +6,7 @@ const db = require('../db');
 // List all departments
 router.get('/', auth, async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT department_id, department_name, description FROM Department');
+    const [rows] = await db.query('SELECT department_id, department_name, description FROM department');
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: 'Database error', details: err.message });
@@ -24,7 +24,7 @@ router.post('/', auth, async (req, res) => {
   }
   try {
     const [result] = await db.query(
-      'INSERT INTO Department (department_name, description) VALUES (?, ?)',
+      'INSERT INTO department (department_name, description) VALUES (?, ?)',
       [department_name, description]
     );
     res.json({
@@ -51,7 +51,7 @@ router.put('/:id', auth, async (req, res) => {
   }
   try {
     await db.query(
-      'UPDATE Department SET department_name = ?, description = ? WHERE department_id = ?',
+      'UPDATE department SET department_name = ?, description = ? WHERE department_id = ?',
       [department_name, description, req.params.id]
     );
     res.json({
@@ -73,7 +73,7 @@ router.delete('/:id', auth, async (req, res) => {
     return res.status(403).json({ error: 'Forbidden' });
   }
   try {
-    await db.query('DELETE FROM Department WHERE department_id = ?', [req.params.id]);
+    await db.query('DELETE FROM department WHERE department_id = ?', [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Database error', details: err.message });
