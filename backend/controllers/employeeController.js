@@ -28,7 +28,7 @@ const generateEmployeeQR = async (req, res) => {
     // Save or update QR code in DB (optional)
     await db.query(
       `
-      INSERT INTO QR_CODE (employee_id, code_value, date_generated)
+      INSERT INTO qr_code (employee_id, code_value, date_generated)
       VALUES (?, ?, NOW())
       ON DUPLICATE KEY UPDATE
       code_value = VALUES(code_value),
