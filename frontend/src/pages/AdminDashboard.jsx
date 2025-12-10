@@ -238,7 +238,6 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-        {message && <div className="mt-2 text-info">{message}</div>}
       </div>
 
       <div style={{ display: 'flex', gap: 24, margin: '32px 0', justifyContent: 'center' }}>
