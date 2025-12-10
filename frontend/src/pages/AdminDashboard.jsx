@@ -103,40 +103,6 @@ function AdminDashboard() {
     }
   };
 
-  const handleTimeIn = async () => {
-    if (!scannedEmployee) return;
-    try {
-      const res = await fetch('/api/attendance/time-in', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify({ employeeID: scannedEmployee.employeeID })
-      });
-      const data = await res.json();
-      setMessage(data.message || (data.success ? 'Time in recorded' : 'Failed'));
-      fetchAttendance();
-      setScannedEmployee(null);
-    } catch {
-      setMessage('Failed to time in');
-    }
-  };
-
-  const handleTimeOut = async () => {
-    if (!scannedEmployee) return;
-    try {
-      const res = await fetch('/api/attendance/time-out', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        body: JSON.stringify({ employeeID: scannedEmployee.employeeID })
-      });
-      const data = await res.json();
-      setMessage(data.message || (data.success ? 'Time out recorded' : 'Failed'));
-      fetchAttendance();
-      setScannedEmployee(null);
-    } catch {
-      setMessage('Failed to time out');
-    }
-  };
-
   useEffect(() => {
     fetchAttendance();
   }, []);
