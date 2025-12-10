@@ -9,7 +9,6 @@ export default function Reports() {
   const [month, setMonth] = useState('');
   const [logsRange, setLogsRange] = useState({ from: '', to: '' });
   const [records, setRecords] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [generatedReports, setGeneratedReports] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [remarks, setRemarks] = useState('');
@@ -42,7 +41,6 @@ export default function Reports() {
   };
 
   const fetchReport = async () => {
-    setLoading(true);
     try {
       let res;
       const token = localStorage.getItem('token');
@@ -63,7 +61,6 @@ export default function Reports() {
     } catch (err) {
       alert('Failed to fetch report');
     }
-    setLoading(false);
   };
 
   const exportReport = async () => {
