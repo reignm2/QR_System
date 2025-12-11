@@ -102,6 +102,36 @@ function AdminDashboard() {
     }
   };
 
+    const handleTimeIn = async () => {
+    if (!scannedEmployee) return;
+    try {
+      const res = await fetch('/api/attendance/time-in', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ employeeID: scannedEmployee.employeeID })
+      });
+      const data = await res.json();
+      fetchAttendance();
+      setScannedEmployee(null);
+    } catch {
+    }
+  };
+
+  const handleTimeOut = async () => {
+    if (!scannedEmployee) return;
+    try {
+      const res = await fetch('/api/attendance/time-out', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        body: JSON.stringify({ employeeID: scannedEmployee.employeeID })
+      });
+      const data = await res.json();
+      fetchAttendance();
+      setScannedEmployee(null);
+    } catch {
+    }
+  };
+
   useEffect(() => {
     fetchAttendance();
   }, []);
