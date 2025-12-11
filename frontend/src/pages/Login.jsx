@@ -22,9 +22,9 @@ function Login() {
     try {
       let res;
       if (role === 'employee') {
-        res = await API.post('/auth/employee/login', { employeeID, password });
+        res = await API.post('https://qrdb-backend.up.railway.app/api/auth/employee/login', { employeeID, password });
       } else {
-        res = await API.post('/auth/admin/login', { username, password });
+        res = await API.post('https://qrdb-backend.up.railway.app/api/auth/admin/login', { username, password });
       }
       // Save token and redirect (example)
       localStorage.setItem('token', res.data.token);
